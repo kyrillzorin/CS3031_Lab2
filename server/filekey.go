@@ -1,0 +1,84 @@
+package main
+
+import (
+	"errors"
+
+	r "github.com/dancannon/gorethink"
+)
+
+var fileKeyTable r.Term = r.Table("filekeys")
+
+type FileKey struct {
+	Id    string `gorethink:"id,omitempty"`
+	User  string `gorethink:"user"`
+	Owner string `gorethink:"owner"`
+	Name  string `gorethink:"name"`
+	Key   []byte `gorethink:"key"`
+}
+
+func NewFileKey(user string, owner string, name string, key []byte) *FileKey {
+	f := new(FileKey)
+	f.User = user
+	f.Owner = owner
+	f.Name = name
+	f.Key = key
+	return f
+}
+
+// Inserts file key into DB
+func (f *FileKey) Insert(dbSession *r.Session) (res r.WriteResponse, err error) {
+	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).GetAllByIndex("owner", f.Owner).GetAllByIndex("user", f.User).Run(dbSession)
+	if err != nil {
+		return
+	}
+	if !dbRes.IsNil() {
+		filekey := new(FileKey)
+		err = dbRes.One(&filekey)
+		if err != nil {
+			return
+		}
+		f.Id = filekey.Id
+		res, err = f.Update(dbSession)
+		return
+	}
+	res, err = fileKeyTable.Insert(f).RunWrite(dbSession)
+	return
+}
+
+// Updates file key in DB
+func (f *FileKey) Update(dbSession *r.Session) (res r.WriteResponse, err error) {
+	res, err = fileKeyTable.Get(f.Id).Update(f).RunWrite(dbSession)
+	return
+}
+
+// Revoke file key from DB
+func (f *FileKey) Revoke(dbSession *r.Session) (res r.WriteResponse, err error) {
+	if f.User == f.Owner {
+		err = errors.New("Can't revoke own file access")
+		return
+	}
+	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).GetAllByIndex("owner", f.Owner).GetAllByIndex("user", f.User).Run(dbSession)
+	if err != nil {
+		return
+	}
+	if !dbRes.IsNil() {
+		filekey := new(FileKey)
+		err = dbRes.One(&filekey)
+		if err != nil {
+			return
+		}
+		res, err = fileKeyTable.Get(filekey.Id).Delete().RunWrite(dbSession)
+		return
+	}
+	return
+}
+
+func GetFileKey(owner string, filename string, user string, dbSession *r.Session) (filekey *FileKey, err error) {
+	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).GetAllByIndex("user", user).Run(dbSession)
+	if err != nil {
+		return
+	}
+	filekey = new(FileKey)
+	err = res.One(&filekey)
+	return
+}
