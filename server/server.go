@@ -46,7 +46,8 @@ func main() {
 	router.POST("/revokefile", revokeFile)
 	router.GET("/users/:username", getUser)
 	router.GET("/users/:username/:filename", getFile)
-	router.GET("/users/:username/:filename/:user", getFileKey)
+	router.GET("/users/:username/:filename/users", getFileUsers)
+	router.GET("/users/:username/:filename/key/:user", getFileKey)
 
 	server := http.Server{
 		Addr:    ":" + Port,

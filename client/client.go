@@ -26,7 +26,7 @@ func init() {
 	viper.SetDefault("Server", "127.0.0.1:8080")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
-    viper.SetConfigType("toml")
+	viper.SetConfigType("toml")
 	err = viper.ReadInConfig()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -43,8 +43,8 @@ Usage:
   client register <username>
   client upload <filepath> <filename>
   client download <user> <filename> <outputpath>
-  client share <filename> <user>
-  client revoke <filename> <user>
+  client share <filename> <user>...
+  client revoke <filename> <user>...
   client -h | --help
 
 Options:
@@ -58,9 +58,9 @@ Options:
 	} else if args["download"].(bool) == true {
 		DownloadFile(args["<user>"].(string), args["<filename>"].(string), args["<outputpath>"].(string))
 	} else if args["share"].(bool) == true {
-		ShareFile(args["<filename>"].(string), args["<user>"].(string), true)
+		ShareFile(args["<filename>"].(string), args["<user>"].([]string), true)
 	} else if args["revoke"].(bool) == true {
-		RevokeFile(args["<filename>"].(string), args["<user>"].(string))
+		RevokeFile(args["<filename>"].(string), args["<user>"].([]string))
 	}
 }
 
@@ -142,34 +142,36 @@ func DownloadFile(owner string, filename string, outputPath string) {
 	os.Exit(0)
 }
 
-func ShareFile(filename string, username string, command bool) {
-	user, err := GetUser(username)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
+func ShareFile(filename string, users []string, command bool) {
 	filekey, err := GetFileKey(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
-	filekey.Id = ""
-	filekey.User = username
 	decodedKey, err := decrypt(ClientPrivateKey, filekey.Key)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
-	encodedKey, err := encrypt(user.PubKey, decodedKey)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-	filekey.Key = encodedKey
-	err = filekey.Share()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
+	for _, username := range users {
+		user, err := GetUser(username)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			os.Exit(1)
+		}
+		filekey.Id = ""
+		filekey.User = username
+		encodedKey, err := encrypt(user.PubKey, decodedKey)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			os.Exit(1)
+		}
+		filekey.Key = encodedKey
+		err = filekey.Share()
+		if err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			os.Exit(1)
+		}
 	}
 	if command {
 		fmt.Println("Successfully shared file")
@@ -177,7 +179,7 @@ func ShareFile(filename string, username string, command bool) {
 	}
 }
 
-func RevokeFile(filename string, user string) {
+func RevokeFile(filename string, users []string) {
 	file, err := GetFile(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -225,13 +227,20 @@ func RevokeFile(filename string, user string) {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
-	filekey = NewFileKey(user, ClientUser, filename, nil)
-	err = filekey.Revoke()
+	for _, user := range users {
+		filekey = NewFileKey(user, ClientUser, filename, nil)
+		err = filekey.Revoke()
+		if err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			os.Exit(1)
+		}
+	}
+	fileUsers, err := GetFileUsers(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
-	//Share with others
+	ShareFile(filename, fileUsers, false)
 	fmt.Println("Successfully revoked file")
 	os.Exit(0)
 }

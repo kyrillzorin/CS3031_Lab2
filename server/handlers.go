@@ -138,6 +138,15 @@ func getFile(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	render.JSON(w, http.StatusOK, file)
 }
 
+func getFileUsers(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	users, err := GetFileUsers(ps.ByName("username"), ps.ByName("filename"), dbSession)
+	if err != nil {
+		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
+		return
+	}
+	render.JSON(w, http.StatusOK, users)
+}
+
 func getFileKey(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	filekey, err := GetFileKey(ps.ByName("username"), ps.ByName("filename"), ps.ByName("user"), dbSession)
 	if err != nil {

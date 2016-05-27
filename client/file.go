@@ -66,3 +66,25 @@ func GetFile(owner string, filename string) (file *File, err error) {
 	err = json.NewDecoder(res.Body).Decode(&file)
 	return
 }
+
+func GetFileUsers(owner string, filename string) (users []string, err error) {
+	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/users")
+	if err != nil {
+		return
+	}
+	if res.Body == nil {
+		err = errors.New("Empty Response")
+		return
+	}
+	var response Response
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return
+	}
+	if response.Status == "failure" {
+		err = errors.New(response.Error)
+		return
+	}
+	err = json.NewDecoder(res.Body).Decode(&users)
+	return
+}

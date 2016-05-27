@@ -82,3 +82,12 @@ func GetFileKey(owner string, filename string, user string, dbSession *r.Session
 	err = res.One(&filekey)
 	return
 }
+
+func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []string, err error) {
+	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).Pluck("user").Run(dbSession)
+	if err != nil {
+		return
+	}
+	err = res.All(&users)
+	return
+}

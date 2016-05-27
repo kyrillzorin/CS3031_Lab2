@@ -71,7 +71,7 @@ func (f *FileKey) Revoke() error {
 }
 
 func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
-	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/" + ClientUser)
+	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/key/" + ClientUser)
 	if err != nil {
 		return
 	}
