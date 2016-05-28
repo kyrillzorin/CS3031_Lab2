@@ -90,5 +90,5 @@ For getting a list of file users the client can make a request to the */users/\<
 File users are those who have access to the file by owning an encoded shared secret for it.  
 The server responds with either the list of file users or an error message.  
 For getting a file key the client can make a request to the */users/\<owner>/\<file>/key/\<user>* endpoint.  
-\<user> is the user who is trying to access the file.
+\<user> is the user who is trying to access the file.  
 The server responds with either the requested file key or an error message.  
