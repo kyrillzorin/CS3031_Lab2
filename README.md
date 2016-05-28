@@ -49,3 +49,6 @@ Below are the valid client commands:
   client share \<filename> \<user>...  
   client revoke \<filename> \<user>...  
   client -h | --help  
+
+\... means one or more variables, in this case users.  
+The help screen shows the application name and usage instructions.  
