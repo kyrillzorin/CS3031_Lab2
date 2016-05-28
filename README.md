@@ -57,8 +57,8 @@ The help screen shows the application name and usage instructions.
 ## Implementation and Protocol
 
 The client, server and initDB programs are written in [Go](https://golang.org).  
-The getdependencies.sh and compile.sh scripts are written in [Bash](https://www.gnu.org/software/bash).  
 I primarily relied on Go's standard libraries for functionality but also used several open source libraries.  
+The getdependencies.sh and compile.sh scripts are written in [Bash](https://www.gnu.org/software/bash).  
 The server uses the [RethinkDB Database](http://rethinkdb.com) to store files, keys and users.  
 The initDB program is a simple utility which will create the necessary DB, tables and indices.  
 I used the [GoRethink library](https://github.com/dancannon/gorethink) to interface with the database.  
