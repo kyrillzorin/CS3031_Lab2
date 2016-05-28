@@ -7,10 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func indexHandler(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	http.Redirect(w, req, "/lol", http.StatusFound)
-}
-
+// Register a new user
 func register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	var user User
 	if req.Body == nil {
@@ -30,6 +27,7 @@ func register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	render.JSON(w, http.StatusOK, map[string]string{"Status": "success", "Error": ""})
 }
 
+// Handle a file upload
 func uploadFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	var signedRequest SignedRequest
 	if req.Body == nil {
@@ -48,6 +46,7 @@ func uploadFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 	user, _ := GetUser(file.Owner, dbSession)
+	// Verify signed message
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
 		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
 		return
@@ -60,6 +59,7 @@ func uploadFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	render.JSON(w, http.StatusOK, map[string]string{"Status": "success", "Error": ""})
 }
 
+// Share file access with a user
 func shareFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	var signedRequest SignedRequest
 	if req.Body == nil {
@@ -78,6 +78,7 @@ func shareFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 	user, _ := GetUser(filekey.Owner, dbSession)
+	// Verify signed message
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
 		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
 		return
@@ -90,6 +91,7 @@ func shareFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	render.JSON(w, http.StatusOK, map[string]string{"Status": "success", "Error": ""})
 }
 
+// Revoke file access for a user
 func revokeFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	var signedRequest SignedRequest
 	if req.Body == nil {
@@ -120,6 +122,7 @@ func revokeFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	render.JSON(w, http.StatusOK, map[string]string{"Status": "success", "Error": ""})
 }
 
+// Get a user
 func getUser(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	user, err := GetUser(ps.ByName("username"), dbSession)
 	if err != nil {
@@ -129,6 +132,7 @@ func getUser(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	render.JSON(w, http.StatusOK, user)
 }
 
+// Get a file
 func getFile(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	file, err := GetFile(ps.ByName("username"), ps.ByName("filename"), dbSession)
 	if err != nil {
@@ -138,6 +142,7 @@ func getFile(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	render.JSON(w, http.StatusOK, file)
 }
 
+// Get a list of users with access to a file
 func getFileUsers(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	users, err := GetFileUsers(ps.ByName("username"), ps.ByName("filename"), dbSession)
 	if err != nil {
@@ -147,6 +152,7 @@ func getFileUsers(w http.ResponseWriter, req *http.Request, ps httprouter.Params
 	render.JSON(w, http.StatusOK, users)
 }
 
+// Get a file key
 func getFileKey(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	filekey, err := GetFileKey(ps.ByName("username"), ps.ByName("filename"), ps.ByName("user"), dbSession)
 	if err != nil {

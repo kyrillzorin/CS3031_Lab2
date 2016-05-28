@@ -16,6 +16,7 @@ import (
 	"os"
 )
 
+// Load RSA private key from pem file
 func privateKeyFromFile() (*rsa.PrivateKey, error) {
 	var err error
 	var pemData []byte
@@ -36,6 +37,7 @@ func privateKeyFromFile() (*rsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
+// Generate a new RSA private key and save to pem file
 func generatePrivateKey() error {
 	var privateKey *rsa.PrivateKey
 	var err error
@@ -54,6 +56,7 @@ func generatePrivateKey() error {
 	return nil
 }
 
+// Get RSA private key from file or generate new one if necessary
 func getPrivateKey() (*rsa.PrivateKey, error) {
 	if _, err := os.Stat("./priv.pem"); os.IsNotExist(err) {
 		err = generatePrivateKey()
@@ -65,6 +68,7 @@ func getPrivateKey() (*rsa.PrivateKey, error) {
 	return privateKey, err
 }
 
+// Encrypt data using RSA public key
 func encrypt(public_key *rsa.PublicKey, plain_text []byte) ([]byte, error) {
 	var label, encrypted []byte
 	var err error
@@ -74,6 +78,7 @@ func encrypt(public_key *rsa.PublicKey, plain_text []byte) ([]byte, error) {
 	return encrypted, nil
 }
 
+// Decrypt data using RSA private key
 func decrypt(private_key *rsa.PrivateKey, encrypted []byte) ([]byte, error) {
 	var label, decrypted []byte
 	var err error
@@ -83,6 +88,7 @@ func decrypt(private_key *rsa.PrivateKey, encrypted []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
+// Sign message using RSA private key
 func sign(privateKey *rsa.PrivateKey, message []byte) ([]byte, error) {
 	hasher := crypto.SHA256.New()
 	hasher.Write(message)
@@ -94,17 +100,7 @@ func sign(privateKey *rsa.PrivateKey, message []byte) ([]byte, error) {
 	return signature, nil
 }
 
-func verify(publicKey *rsa.PublicKey, message []byte, signature []byte) bool {
-	hasher := crypto.SHA256.New()
-	hasher.Write(message)
-	hashed := hasher.Sum(nil)
-	err := rsa.VerifyPSS(publicKey, crypto.SHA256, hashed, signature, nil)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
+// Encrypt data using AES key
 func encryptAES(key, data []byte) ([]byte, error) {
 	var err error
 	var block cipher.Block
@@ -121,6 +117,7 @@ func encryptAES(key, data []byte) ([]byte, error) {
 	return encryptedData, nil
 }
 
+// Decrypt data using AES key
 func decryptAES(key, encryptedData []byte) ([]byte, error) {
 	var err error
 	var block cipher.Block
@@ -139,6 +136,7 @@ func decryptAES(key, encryptedData []byte) ([]byte, error) {
 	return encryptedData, nil
 }
 
+// Generate new AES (256) key
 func generateAESKey() ([]byte, error) {
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {

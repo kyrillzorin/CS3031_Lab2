@@ -4,8 +4,10 @@ import (
 	r "github.com/dancannon/gorethink"
 )
 
+// File DB table
 var fileTable r.Term = r.Table("files")
 
+// File Struct
 type File struct {
 	Id    string `gorethink:"id,omitempty"`
 	Owner string `gorethink:"owner"`
@@ -13,7 +15,7 @@ type File struct {
 	Data  []byte `gorethink:"data"`
 }
 
-// Inserts file into DB
+// Inserts file into DB, Updates file if it already exists
 func (f *File) Insert(dbSession *r.Session) (res r.WriteResponse, err error) {
 	dbRes, err := fileTable.GetAllByIndex("name", f.Name).GetAllByIndex("owner", f.Owner).Run(dbSession)
 	if err != nil {
@@ -39,6 +41,7 @@ func (f *File) Update(dbSession *r.Session) (res r.WriteResponse, err error) {
 	return
 }
 
+// Get a file from DB
 func GetFile(owner string, filename string, dbSession *r.Session) (file *File, err error) {
 	res, err := fileTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).Run(dbSession)
 	if err != nil {

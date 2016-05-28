@@ -6,23 +6,16 @@ import (
 	r "github.com/dancannon/gorethink"
 )
 
+// File Key DB table
 var fileKeyTable r.Term = r.Table("filekeys")
 
+// File Key Struct
 type FileKey struct {
 	Id    string `gorethink:"id,omitempty"`
 	User  string `gorethink:"user"`
 	Owner string `gorethink:"owner"`
 	Name  string `gorethink:"name"`
 	Key   []byte `gorethink:"key"`
-}
-
-func NewFileKey(user string, owner string, name string, key []byte) *FileKey {
-	f := new(FileKey)
-	f.User = user
-	f.Owner = owner
-	f.Name = name
-	f.Key = key
-	return f
 }
 
 // Inserts file key into DB
@@ -73,6 +66,7 @@ func (f *FileKey) Revoke(dbSession *r.Session) (res r.WriteResponse, err error) 
 	return
 }
 
+// Get file key from DB
 func GetFileKey(owner string, filename string, user string, dbSession *r.Session) (filekey *FileKey, err error) {
 	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).GetAllByIndex("user", user).Run(dbSession)
 	if err != nil {
@@ -83,6 +77,7 @@ func GetFileKey(owner string, filename string, user string, dbSession *r.Session
 	return
 }
 
+// Get a slice (array) of users who have keys to the file
 func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []string, err error) {
 	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).Pluck("user").Run(dbSession)
 	if err != nil {

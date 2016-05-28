@@ -10,12 +10,15 @@ import (
 	ren "github.com/unrolled/render"
 )
 
+// Global Variables
 var dbSession *r.Session
 var render *ren.Render = ren.New(ren.Options{StreamingJSON: true})
 var DBHost, Port string
 
+// Initialize server settings
 func init() {
 	var err error
+	// Initialize DB connection
 	dbSession, err = r.Connect(r.ConnectOpts{
 		Address:  DBHost + ":28015",
 		Database: "Lab2",
@@ -25,6 +28,7 @@ func init() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+	// Initialize config
 	viper.SetDefault("DBHost", "127.0.0.1")
 	viper.SetDefault("Port", "8080")
 	viper.SetConfigName("config")
@@ -38,6 +42,7 @@ func init() {
 	Port = viper.GetString("Port")
 }
 
+// Main function, initialize routes and start server
 func main() {
 	router := httprouter.New()
 	router.POST("/register", register)

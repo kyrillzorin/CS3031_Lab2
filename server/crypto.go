@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 )
 
+// Verify an RSA signed message
 func verify(publicKey *rsa.PublicKey, message []byte, signature []byte) bool {
 	hasher := crypto.SHA256.New()
 	hasher.Write(message)

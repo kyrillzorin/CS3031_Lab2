@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// File Struct
 type File struct {
 	Id    string
 	Owner string
@@ -14,6 +15,7 @@ type File struct {
 	Data  []byte
 }
 
+// Create New File
 func NewFile(owner string, name string, data []byte) *File {
 	f := new(File)
 	f.Owner = owner
@@ -22,8 +24,10 @@ func NewFile(owner string, name string, data []byte) *File {
 	return f
 }
 
+// Upload file to server
 func (f *File) Upload() error {
 	message, err := json.Marshal(f)
+	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
@@ -45,6 +49,7 @@ func (f *File) Upload() error {
 	return err
 }
 
+// Get file from server
 func GetFile(owner string, filename string) (file *File, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename)
 	if err != nil {
@@ -67,6 +72,7 @@ func GetFile(owner string, filename string) (file *File, err error) {
 	return
 }
 
+// Get list of users who have access to file from server
 func GetFileUsers(owner string, filename string) (users []string, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/users")
 	if err != nil {

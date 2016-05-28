@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// File Key Struct
 type FileKey struct {
 	Id    string
 	User  string
@@ -15,6 +16,7 @@ type FileKey struct {
 	Key   []byte
 }
 
+// Create New File Key
 func NewFileKey(user string, owner string, name string, key []byte) *FileKey {
 	f := new(FileKey)
 	f.User = user
@@ -24,8 +26,10 @@ func NewFileKey(user string, owner string, name string, key []byte) *FileKey {
 	return f
 }
 
+// Share a file key on server
 func (f *FileKey) Share() error {
 	message, err := json.Marshal(f)
+	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
@@ -47,8 +51,10 @@ func (f *FileKey) Share() error {
 	return err
 }
 
+// Revoke a file key on server
 func (f *FileKey) Revoke() error {
 	message, err := json.Marshal(f)
+	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
@@ -70,6 +76,7 @@ func (f *FileKey) Revoke() error {
 	return err
 }
 
+// Get a file key from server
 func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/key/" + ClientUser)
 	if err != nil {

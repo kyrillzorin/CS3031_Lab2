@@ -7,6 +7,7 @@ import (
 	r "github.com/dancannon/gorethink"
 )
 
+// User DB table
 var userTable r.Term = r.Table("users")
 
 type User struct {
@@ -28,6 +29,7 @@ func (u *User) Insert(dbSession *r.Session) (wRes r.WriteResponse, err error) {
 	return
 }
 
+// Gets a user from the DB
 func GetUser(username string, dbSession *r.Session) (user *User, err error) {
 	res, err := userTable.GetAllByIndex("username", username).Run(dbSession)
 	if err != nil {

@@ -8,12 +8,14 @@ import (
 	"net/http"
 )
 
+// User Struct
 type User struct {
 	Id       string
 	Username string
 	PubKey   *rsa.PublicKey
 }
 
+// Create new user
 func NewUser(username string, pubkey *rsa.PublicKey) *User {
 	u := new(User)
 	u.Username = username
@@ -21,6 +23,7 @@ func NewUser(username string, pubkey *rsa.PublicKey) *User {
 	return u
 }
 
+// Register user on server
 func (u *User) Register() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(u)
@@ -42,6 +45,7 @@ func (u *User) Register() error {
 	return err
 }
 
+// Get a user from server
 func GetUser(username string) (user *User, err error) {
 	res, err := http.Get(Server + "/users/" + username)
 	if err != nil {

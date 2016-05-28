@@ -10,18 +10,22 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Global Variables
 var ClientPrivateKey *rsa.PrivateKey
 var ClientPublicKey *rsa.PublicKey
 var ClientUser, Server string
 
+// Initialize config
 func init() {
 	var err error
+	// Load RSA private and public key
 	ClientPrivateKey, err = getPrivateKey()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
 	ClientPublicKey = &ClientPrivateKey.PublicKey
+	// Initialize config
 	viper.SetDefault("ClientUser", "test")
 	viper.SetDefault("Server", "127.0.0.1:8080")
 	viper.SetConfigName("config")
@@ -36,6 +40,7 @@ func init() {
 	Server = "http://" + viper.GetString("Server")
 }
 
+// Main function, parses cli args and runs appropriate function
 func main() {
 	usage := `CS3031 Lab2 Client.
 
@@ -64,6 +69,7 @@ Options:
 	}
 }
 
+// Register user with server, will fail if username is taken
 func Register(username string) {
 	user := NewUser(username, ClientPublicKey)
 	err := user.Register()
@@ -75,6 +81,7 @@ func Register(username string) {
 	os.Exit(0)
 }
 
+// Upload a file to server
 func UploadFile(filepath string, filename string) {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -112,6 +119,8 @@ func UploadFile(filepath string, filename string) {
 	os.Exit(0)
 }
 
+// Download File and decrypt with shared key, output file to given path
+// If user doesn't have file access the program will exit with an error message
 func DownloadFile(owner string, filename string, outputPath string) {
 	file, err := GetFile(owner, filename)
 	if err != nil {
@@ -142,7 +151,9 @@ func DownloadFile(owner string, filename string, outputPath string) {
 	os.Exit(0)
 }
 
+// Share file with given users
 func ShareFile(filename string, users []string, command bool) {
+	// Get shared secret key
 	filekey, err := GetFileKey(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -153,6 +164,7 @@ func ShareFile(filename string, users []string, command bool) {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
+	// Share file access with given users
 	for _, username := range users {
 		user, err := GetUser(username)
 		if err != nil {
@@ -173,13 +185,16 @@ func ShareFile(filename string, users []string, command bool) {
 			os.Exit(1)
 		}
 	}
+	// If run as terminal command exit with success message
 	if command {
 		fmt.Println("Successfully shared file")
 		os.Exit(0)
 	}
 }
 
+// Revoke file access for given users
 func RevokeFile(filename string, users []string) {
+	// Get existing file and key
 	file, err := GetFile(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -200,6 +215,7 @@ func RevokeFile(filename string, users []string) {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
+	// Create new key, re-encrypt and upload file
 	newKey, err := generateAESKey()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -227,6 +243,7 @@ func RevokeFile(filename string, users []string) {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
+	// Revoke file access for given users
 	for _, user := range users {
 		filekey = NewFileKey(user, ClientUser, filename, nil)
 		err = filekey.Revoke()
@@ -235,11 +252,13 @@ func RevokeFile(filename string, users []string) {
 			os.Exit(1)
 		}
 	}
+	// Get remaining file users
 	fileUsers, err := GetFileUsers(ClientUser, filename)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
+	// Reshare file with remaining file users
 	ShareFile(filename, fileUsers, false)
 	fmt.Println("Successfully revoked file")
 	os.Exit(0)

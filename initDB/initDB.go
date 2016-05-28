@@ -7,11 +7,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Global Variables
 var dbSession *r.Session
 var DBHost string
 
+// Initialize program confige
 func init() {
 	var err error
+    // Initialize DB connection
 	dbSession, err = r.Connect(r.ConnectOpts{
 		Address: DBHost + ":28015",
 		MaxIdle: 10,
@@ -20,6 +23,7 @@ func init() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+    // Initialize config
 	viper.SetDefault("DBHost", "127.0.0.1")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
@@ -31,6 +35,7 @@ func init() {
 	DBHost = viper.GetString("DBHost")
 }
 
+// Main function, creates database, tables and indices required by server
 func main() {
 	_, err := r.DBCreate("Lab2").RunWrite(dbSession)
 	if err != nil {
