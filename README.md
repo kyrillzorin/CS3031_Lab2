@@ -1,7 +1,7 @@
 CS3031 Lab 2: Securing the Cloud
 ================================
 
-This project was developed by Kyrill Zorin.
+This project was developed by Kyrill Zorin.  
 For this project I developed a secure cloud storage application.  
 The project consists of a client and a server, as well as some helpful setup scripts.  
 The client and server are written in [Go](https://golang.org).  
