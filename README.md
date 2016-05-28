@@ -1,12 +1,12 @@
 CS3031 Lab 2: Securing the Cloud
 ================================
 
+This project was developed by Kyrill Zorin.
 For this project I developed a secure cloud storage application.  
 The project consists of a client and a server, as well as some helpful setup scripts.  
 The client and server are written in [Go](https://golang.org).  
 The server uses the [RethinkDB Database](http://rethinkdb.com) to store files, keys and users.  
 The client provides a CLI interface to connect to the server and carry out actions.  
-
 
 ## Installation and Compilation
 
@@ -51,6 +51,7 @@ Below are the valid client commands:
 
 \<foo> indicates a variable.  
 \... means one or more variables, in this case users.  
+The share and revoke commands can be used to act on one or multiple users simultaneously.  
 The help screen shows the application name and usage instructions.  
 
 ## Implementation and Protocol
@@ -92,3 +93,25 @@ The server responds with either the list of file users or an error message.
 For getting a file key the client can make a request to the */users/\<owner>/\<file>/key/\<user>* endpoint.  
 \<user> is the user who is trying to access the file.  
 The server responds with either the requested file key or an error message.  
+
+To upload a file the client can make a request to the */uploadfile* endpoint.  
+The file is first encrypted on the client using a generated shared secret.  
+The upload request is then signed with the client's private key and sent to the server.  
+The server verifies the request, saves the file in the database and responds with the status.  
+The user then uploads the shared key encrypted with their public key so that they can safely retrieve it at any time.  
+
+To share a file with a user the client encodes the shared secret key using that user's public key.  
+A signed request with the key is then made to the */sharefile* endpoint.  
+The server verifies the request, saves the file key in the database and responds with the status.  
+My implementation provides file access management on a per-file basis to provide greater control to the file owner.  
+When downloading a file the user gets the file and the filekey and decrypts the file key using their private key.  
+They can then use the decrypted shared secret to decrypt the file itself.  
+If a user does not have access to the file the client will simply exit with an error message.  
+If a web browser is used to access the file it will show the encrypted data.  
+
+To revoke file access the client sends a signed request to the */revokefile* endpoint.  
+The server verifies the request, removes the file key from the database and responds with the status.  
+The client then creates a new shared secret, re-encrypts the file using it and re-uploads the file to the server.  
+The new shared secret is then shared with the remaining file users so that they can still access the file.  
+
+The code is commented and provides some further imformation regarding the implementation.
