@@ -27,6 +27,9 @@ func NewFile(owner string, name string, data []byte) *File {
 // Upload file to server
 func (f *File) Upload() error {
 	message, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
 	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)

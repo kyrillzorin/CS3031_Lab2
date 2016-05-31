@@ -29,6 +29,9 @@ func NewFileKey(user string, owner string, name string, key []byte) *FileKey {
 // Share a file key on server
 func (f *FileKey) Share() error {
 	message, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
 	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)
@@ -54,6 +57,9 @@ func (f *FileKey) Share() error {
 // Revoke a file key on server
 func (f *FileKey) Revoke() error {
 	message, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
 	// Sign the request
 	signature, _ := sign(ClientPrivateKey, message)
 	b := new(bytes.Buffer)
