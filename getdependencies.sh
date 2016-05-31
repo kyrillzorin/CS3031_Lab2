@@ -1,6 +1,6 @@
 #! /bin/bash
-go get "github.com/docopt/docopt-go"
-go get "github.com/spf13/viper"
-go get "github.com/dancannon/gorethink"
-go get "github.com/julienschmidt/httprouter"
-go get "github.com/unrolled/render"
+go get -u "github.com/docopt/docopt-go"
+go get -u "github.com/spf13/viper"
+go get -u "github.com/dancannon/gorethink"
+go get -u "github.com/julienschmidt/httprouter"
+go get -u "github.com/unrolled/render"
