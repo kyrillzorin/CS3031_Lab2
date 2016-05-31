@@ -48,7 +48,7 @@ func uploadFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	user, _ := GetUser(file.Owner, dbSession)
 	// Verify signed message
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
-		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
+		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": "Could not verify signature"})
 		return
 	}
 	_, err = file.Insert(dbSession)
@@ -80,7 +80,7 @@ func shareFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	user, _ := GetUser(filekey.Owner, dbSession)
 	// Verify signed message
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
-		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
+		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": "Could not verify signature"})
 		return
 	}
 	_, err = filekey.Insert(dbSession)
@@ -111,7 +111,7 @@ func revokeFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	}
 	user, _ := GetUser(filekey.Owner, dbSession)
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
-		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": err.Error()})
+		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": "Could not verify signature"})
 		return
 	}
 	_, err = filekey.Revoke(dbSession)

@@ -33,7 +33,10 @@ func (f *FileKey) Share() error {
 		return err
 	}
 	// Sign the request
-	signature, _ := sign(ClientPrivateKey, message)
+	signature, err := sign(ClientPrivateKey, message)
+	if err != nil {
+		return err
+	}
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/sharefile", "application/json; charset=utf-8", b)
@@ -61,7 +64,10 @@ func (f *FileKey) Revoke() error {
 		return err
 	}
 	// Sign the request
-	signature, _ := sign(ClientPrivateKey, message)
+	signature, err := sign(ClientPrivateKey, message)
+	if err != nil {
+		return err
+	}
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/revokefile", "application/json; charset=utf-8", b)

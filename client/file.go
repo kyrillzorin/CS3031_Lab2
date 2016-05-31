@@ -31,7 +31,10 @@ func (f *File) Upload() error {
 		return err
 	}
 	// Sign the request
-	signature, _ := sign(ClientPrivateKey, message)
+	signature, err := sign(ClientPrivateKey, message)
+	if err != nil {
+		return err
+	}
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/uploadfile", "application/json; charset=utf-8", b)
