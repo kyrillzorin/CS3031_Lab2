@@ -93,7 +93,8 @@ func sign(privateKey *rsa.PrivateKey, message []byte) ([]byte, error) {
 	hasher := crypto.SHA256.New()
 	hasher.Write(message)
 	hashed := hasher.Sum(nil)
-	signature, err := rsa.SignPSS(rand.Reader, privateKey, crypto.SHA256, hashed, nil)
+    var opts rsa.PSSOptions
+	signature, err := rsa.SignPSS(rand.Reader, privateKey, crypto.SHA256, hashed, &opts)
 	if err != nil {
 		return nil, err
 	}
