@@ -45,7 +45,7 @@ func main() {
 	usage := `CS3031 Lab2 Client.
 
 Usage:
-  client register <username>
+  client register
   client upload <filepath> <filename>
   client download <user> <filename> <outputpath>
   client share <filename> <user>...
@@ -57,7 +57,7 @@ Options:
 
 	args, _ := docopt.Parse(usage, nil, true, "", false)
 	if args["register"].(bool) == true {
-		Register(args["<username>"].(string))
+		Register()
 	} else if args["upload"].(bool) == true {
 		UploadFile(args["<filepath>"].(string), args["<filename>"].(string))
 	} else if args["download"].(bool) == true {
@@ -70,8 +70,8 @@ Options:
 }
 
 // Register user with server, will fail if username is taken
-func Register(username string) {
-	user := NewUser(username, ClientPublicKey)
+func Register() {
+	user := NewUser(ClientUser, ClientPublicKey)
 	err := user.Register()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())

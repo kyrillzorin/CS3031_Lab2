@@ -42,7 +42,7 @@ The client program needs to be run with arguments otherwise it will simply print
 
 Below are the valid client commands:  
 
-  client register \<username>  
+  client register  
   client upload \<filepath> \<filename>  
   client download \<user> \<filename> \<outputpath>  
   client share \<filename> \<user>...  
