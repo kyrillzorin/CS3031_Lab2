@@ -16,6 +16,11 @@ type File struct {
 	Data  []byte
 }
 
+// File Users Struct
+type FileUsers struct {
+	Users []string
+}
+
 // Create New File
 func NewFile(owner string, name string, data []byte) *File {
 	f := new(File)
@@ -109,6 +114,11 @@ func GetFileUsers(owner string, filename string) (users []string, err error) {
 		err = errors.New(response.Error)
 		return
 	}
-	err = json.NewDecoder(bytes.NewReader(body)).Decode(&users)
+	userList := new(FileUsers)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&userList)
+	if err != nil {
+		return
+	}
+	users = userList.Users
 	return
 }

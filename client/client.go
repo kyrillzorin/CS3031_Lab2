@@ -166,6 +166,9 @@ func ShareFile(filename string, users []string, command bool) {
 	}
 	// Share file access with given users
 	for _, username := range users {
+		if username == ClientUser {
+			continue
+		}
 		user, err := GetUser(username)
 		if err != nil {
 			fmt.Printf("Error: %s\n", err.Error())

@@ -18,6 +18,11 @@ type FileKey struct {
 	Key   []byte `gorethink:"key"`
 }
 
+// File Users Struct
+type FileUsers struct {
+	Users []string
+}
+
 // Inserts file key into DB
 func (f *FileKey) Insert(dbSession *r.Session) (res r.WriteResponse, err error) {
 	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).Filter(map[string]interface{}{"owner": f.Owner, "user": f.User}).Run(dbSession)
@@ -82,7 +87,7 @@ func GetFileKey(owner string, filename string, user string, dbSession *r.Session
 }
 
 // Get a slice (array) of users who have keys to the file
-func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []string, err error) {
+func GetFileUsers(owner string, filename string, dbSession *r.Session) (userList *FileUsers, err error) {
 	res, err := fileKeyTable.GetAllByIndex("name", filename).Filter(map[string]interface{}{"owner": owner}).Pluck("user").Run(dbSession)
 	if err != nil {
 		return
@@ -92,9 +97,11 @@ func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []
 	if err != nil {
 		return
 	}
-	users = make([]string, 0, len(userMap))
+	users := make([]string, 0, len(userMap))
 	for _, user := range userMap {
 		users = append(users, user["user"])
 	}
+	userList = new(FileUsers)
+	userList.Users = users
 	return
 }
