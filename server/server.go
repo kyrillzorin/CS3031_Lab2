@@ -30,7 +30,7 @@ func init() {
 	}
 	// Initialize config
 	viper.SetDefault("DBHost", "127.0.0.1")
-	viper.SetDefault("Port", "8080")
+	viper.SetDefault("Port", "3000")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("toml")

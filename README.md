@@ -25,12 +25,12 @@ The config file is in [TOML](https://github.com/toml-lang/toml) format.
 For the client, valid config paramaters are:  
 
   * ClientUser (The client user, default = "test")  
-  * Server (The cloud server, default = "127.0.0.1:8080")  
+  * Server (The cloud server, default = "127.0.0.1:3000")  
 
 For the server, valid config paramaters are:  
 
   * DBHost (The RethinkDB host, default = "127.0.0.1")  
-  * Port = (The port to run the surver on, default = "8080")  
+  * Port = (The port to run the surver on, default = "3000")  
 
 For the initDB program, valid config paramater is:  
 

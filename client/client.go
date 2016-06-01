@@ -27,7 +27,7 @@ func init() {
 	ClientPublicKey = &ClientPrivateKey.PublicKey
 	// Initialize config
 	viper.SetDefault("ClientUser", "test")
-	viper.SetDefault("Server", "127.0.0.1:8080")
+	viper.SetDefault("Server", "127.0.0.1:3000")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("toml")
