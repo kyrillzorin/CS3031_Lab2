@@ -61,7 +61,7 @@ Options:
 	} else if args["upload"].(bool) == true {
 		UploadFile(args["<filepath>"].(string), args["<filename>"].(string))
 	} else if args["download"].(bool) == true {
-		DownloadFile(args["<user>"].(string), args["<filename>"].(string), args["<outputpath>"].(string))
+		DownloadFile(args["<user>"].([]string)[0], args["<filename>"].(string), args["<outputpath>"].(string))
 	} else if args["share"].(bool) == true {
 		ShareFile(args["<filename>"].(string), args["<user>"].([]string), true)
 	} else if args["revoke"].(bool) == true {

@@ -20,7 +20,7 @@ type FileKey struct {
 
 // Inserts file key into DB
 func (f *FileKey) Insert(dbSession *r.Session) (res r.WriteResponse, err error) {
-	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).GetAllByIndex("owner", f.Owner).GetAllByIndex("user", f.User).Run(dbSession)
+	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).Filter(map[string]interface{}{"owner": f.Owner, "user": f.User}).Run(dbSession)
 	if err != nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (f *FileKey) Revoke(dbSession *r.Session) (res r.WriteResponse, err error) 
 		err = errors.New("Can't revoke own file access")
 		return
 	}
-	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).GetAllByIndex("owner", f.Owner).GetAllByIndex("user", f.User).Run(dbSession)
+	dbRes, err := fileKeyTable.GetAllByIndex("name", f.Name).Filter(map[string]interface{}{"owner": f.Owner, "user": f.User}).Run(dbSession)
 	if err != nil {
 		return
 	}
@@ -68,7 +68,7 @@ func (f *FileKey) Revoke(dbSession *r.Session) (res r.WriteResponse, err error) 
 
 // Get file key from DB
 func GetFileKey(owner string, filename string, user string, dbSession *r.Session) (filekey *FileKey, err error) {
-	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).GetAllByIndex("user", user).Run(dbSession)
+	res, err := fileKeyTable.GetAllByIndex("name", filename).Filter(map[string]interface{}{"owner": owner, "user": user}).Run(dbSession)
 	if err != nil {
 		return
 	}
@@ -79,7 +79,7 @@ func GetFileKey(owner string, filename string, user string, dbSession *r.Session
 
 // Get a slice (array) of users who have keys to the file
 func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []string, err error) {
-	res, err := fileKeyTable.GetAllByIndex("name", filename).GetAllByIndex("owner", owner).Pluck("user").Run(dbSession)
+	res, err := fileKeyTable.GetAllByIndex("name", filename).Filter(map[string]interface{}{"owner": owner}).Pluck("user").Run(dbSession)
 	if err != nil {
 		return
 	}

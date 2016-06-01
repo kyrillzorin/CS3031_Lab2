@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -38,6 +39,7 @@ func (f *File) Upload() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/uploadfile", "application/json; charset=utf-8", b)
+	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -58,6 +60,7 @@ func (f *File) Upload() error {
 // Get file from server
 func GetFile(owner string, filename string) (file *File, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename)
+	defer res.Body.Close()
 	if err != nil {
 		return
 	}
@@ -65,8 +68,12 @@ func GetFile(owner string, filename string) (file *File, err error) {
 		err = errors.New("Empty Response")
 		return
 	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
 	var response Response
-	err = json.NewDecoder(res.Body).Decode(&response)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&response)
 	if err != nil {
 		return
 	}
@@ -74,13 +81,14 @@ func GetFile(owner string, filename string) (file *File, err error) {
 		err = errors.New(response.Error)
 		return
 	}
-	err = json.NewDecoder(res.Body).Decode(&file)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&file)
 	return
 }
 
 // Get list of users who have access to file from server
 func GetFileUsers(owner string, filename string) (users []string, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/users")
+	defer res.Body.Close()
 	if err != nil {
 		return
 	}
@@ -88,8 +96,12 @@ func GetFileUsers(owner string, filename string) (users []string, err error) {
 		err = errors.New("Empty Response")
 		return
 	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
 	var response Response
-	err = json.NewDecoder(res.Body).Decode(&response)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&response)
 	if err != nil {
 		return
 	}
@@ -97,6 +109,6 @@ func GetFileUsers(owner string, filename string) (users []string, err error) {
 		err = errors.New(response.Error)
 		return
 	}
-	err = json.NewDecoder(res.Body).Decode(&users)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&users)
 	return
 }

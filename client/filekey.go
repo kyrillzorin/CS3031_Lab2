@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -40,6 +41,7 @@ func (f *FileKey) Share() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/sharefile", "application/json; charset=utf-8", b)
+	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -71,6 +73,7 @@ func (f *FileKey) Revoke() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/revokefile", "application/json; charset=utf-8", b)
+	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -91,6 +94,7 @@ func (f *FileKey) Revoke() error {
 // Get a file key from server
 func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/key/" + ClientUser)
+	defer res.Body.Close()
 	if err != nil {
 		return
 	}
@@ -98,8 +102,12 @@ func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
 		err = errors.New("Empty Response")
 		return
 	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
 	var response Response
-	err = json.NewDecoder(res.Body).Decode(&response)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&response)
 	if err != nil {
 		return
 	}
@@ -107,6 +115,6 @@ func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
 		err = errors.New(response.Error)
 		return
 	}
-	err = json.NewDecoder(res.Body).Decode(&filekey)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&filekey)
 	return
 }

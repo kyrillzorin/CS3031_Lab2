@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -28,6 +29,7 @@ func (u *User) Register() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(u)
 	res, err := http.Post(Server+"/register", "application/json; charset=utf-8", b)
+	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -48,6 +50,7 @@ func (u *User) Register() error {
 // Get a user from server
 func GetUser(username string) (user *User, err error) {
 	res, err := http.Get(Server + "/users/" + username)
+	defer res.Body.Close()
 	if err != nil {
 		return
 	}
@@ -55,8 +58,12 @@ func GetUser(username string) (user *User, err error) {
 		err = errors.New("Empty Response")
 		return
 	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
 	var response Response
-	err = json.NewDecoder(res.Body).Decode(&response)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&response)
 	if err != nil {
 		return
 	}
@@ -64,6 +71,6 @@ func GetUser(username string) (user *User, err error) {
 		err = errors.New(response.Error)
 		return
 	}
-	err = json.NewDecoder(res.Body).Decode(&user)
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&user)
 	return
 }
