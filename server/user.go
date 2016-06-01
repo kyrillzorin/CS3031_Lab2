@@ -53,6 +53,10 @@ func GetUser(username string, dbSession *r.Session) (user *User, err error) {
 	if err != nil {
 		return
 	}
+	if res.IsNil() {
+		err = errors.New("User does not exist")
+		return
+	}
 	u := new(dbUser)
 	err = res.One(&u)
 	if err != nil {

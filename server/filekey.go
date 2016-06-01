@@ -72,6 +72,10 @@ func GetFileKey(owner string, filename string, user string, dbSession *r.Session
 	if err != nil {
 		return
 	}
+	if res.IsNil() {
+		err = errors.New("You do not have access to this file")
+		return
+	}
 	filekey = new(FileKey)
 	err = res.One(&filekey)
 	return
@@ -83,6 +87,14 @@ func GetFileUsers(owner string, filename string, dbSession *r.Session) (users []
 	if err != nil {
 		return
 	}
-	err = res.All(&users)
+	var userMap []map[string]string
+	err = res.All(&userMap)
+	if err != nil {
+		return
+	}
+	users = make([]string, 0, len(userMap))
+	for _, user := range userMap {
+		users = append(users, user["user"])
+	}
 	return
 }

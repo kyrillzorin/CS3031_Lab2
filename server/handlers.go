@@ -110,6 +110,7 @@ func revokeFile(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 	user, _ := GetUser(filekey.Owner, dbSession)
+	// Verify signed message
 	if !verify(user.PubKey, signedRequest.Message, signedRequest.Signature) {
 		render.JSON(w, http.StatusBadRequest, map[string]string{"Status": "failure", "Error": "Could not verify signature"})
 		return

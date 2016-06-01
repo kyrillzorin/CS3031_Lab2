@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	r "github.com/dancannon/gorethink"
 )
 
@@ -45,6 +47,10 @@ func (f *File) Update(dbSession *r.Session) (res r.WriteResponse, err error) {
 func GetFile(owner string, filename string, dbSession *r.Session) (file *File, err error) {
 	res, err := fileTable.GetAllByIndex("name", filename).Filter(map[string]interface{}{"owner": owner}).Run(dbSession)
 	if err != nil {
+		return
+	}
+	if res.IsNil() {
+		err = errors.New("File does not exist")
 		return
 	}
 	file = new(File)
