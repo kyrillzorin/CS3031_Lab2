@@ -41,12 +41,12 @@ func (f *FileKey) Share() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/sharefile", "application/json; charset=utf-8", b)
+	if res.Body == nil {
+		return errors.New("Empty Response")
+	}
 	defer res.Body.Close()
 	if err != nil {
 		return err
-	}
-	if res.Body == nil {
-		return errors.New("Empty Response")
 	}
 	var response Response
 	err = json.NewDecoder(res.Body).Decode(&response)
@@ -73,12 +73,12 @@ func (f *FileKey) Revoke() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/revokefile", "application/json; charset=utf-8", b)
+	if res.Body == nil {
+		return errors.New("Empty Response")
+	}
 	defer res.Body.Close()
 	if err != nil {
 		return err
-	}
-	if res.Body == nil {
-		return errors.New("Empty Response")
 	}
 	var response Response
 	err = json.NewDecoder(res.Body).Decode(&response)
@@ -94,12 +94,12 @@ func (f *FileKey) Revoke() error {
 // Get a file key from server
 func GetFileKey(owner string, filename string) (filekey *FileKey, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/key/" + ClientUser)
-	defer res.Body.Close()
-	if err != nil {
-		return
-	}
 	if res.Body == nil {
 		err = errors.New("Empty Response")
+		return
+	}
+	defer res.Body.Close()
+	if err != nil {
 		return
 	}
 	body, err := ioutil.ReadAll(res.Body)
