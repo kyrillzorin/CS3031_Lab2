@@ -44,6 +44,9 @@ func (f *File) Upload() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(SignedRequest{message, signature})
 	res, err := http.Post(Server+"/uploadfile", "application/json; charset=utf-8", b)
+	if res == nil {
+		return errors.New("Empty Response")
+	}
 	if res.Body == nil {
 		return errors.New("Empty Response")
 	}
@@ -65,6 +68,10 @@ func (f *File) Upload() error {
 // Get file from server
 func GetFile(owner string, filename string) (file *File, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename)
+	if res == nil {
+		err = errors.New("Empty Response")
+		return
+	}
 	if res.Body == nil {
 		err = errors.New("Empty Response")
 		return
@@ -93,6 +100,10 @@ func GetFile(owner string, filename string) (file *File, err error) {
 // Get list of users who have access to file from server
 func GetFileUsers(owner string, filename string) (users []string, err error) {
 	res, err := http.Get(Server + "/users/" + owner + "/" + filename + "/users")
+	if res == nil {
+		err = errors.New("Empty Response")
+		return
+	}
 	if res.Body == nil {
 		err = errors.New("Empty Response")
 		return

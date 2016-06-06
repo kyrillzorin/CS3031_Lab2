@@ -29,6 +29,9 @@ func (u *User) Register() error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(u)
 	res, err := http.Post(Server+"/register", "application/json; charset=utf-8", b)
+	if res == nil {
+		return errors.New("Empty Response")
+	}
 	if res.Body == nil {
 		return errors.New("Empty Response")
 	}
@@ -50,6 +53,10 @@ func (u *User) Register() error {
 // Get a user from server
 func GetUser(username string) (user *User, err error) {
 	res, err := http.Get(Server + "/users/" + username)
+	if res == nil {
+		err = errors.New("Empty Response")
+		return
+	}
 	if res.Body == nil {
 		err = errors.New("Empty Response")
 		return
